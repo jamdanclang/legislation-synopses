@@ -16,7 +16,7 @@ def fetch_openstates_bills() -> List[Dict[str,Any]]:
     assert OPENSTATES_API_KEY, "OPENSTATES_API_KEY not set"
     url = "https://v3.openstates.org/bills"
     params = {
-        "jurisdiction": "Nebraska",
+        "jurisdiction": "ocd-jurisdiction/country:us/state:ne/government",
         "created_since": date_n_days_ago(LOOKBACK_DAYS),
         "sort": "-created_at",
         "per_page": 50,
