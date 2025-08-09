@@ -15,9 +15,6 @@ python -m pip install -U requests beautifulsoup4
 $env:OPENSTATES_API_KEY="YOUR_KEY"
 python scripts/etl.py
 
-# macOS/Linux
-export OPENSTATES_API_KEY="YOUR_KEY"
-python scripts/etl.py
 ```
 
 3) Install Node deps & run locally:
