@@ -1,0 +1,9 @@
+/* minimal styles */
+* { box-sizing: border-box; }
+body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji; }
+.badge { display:inline-flex; padding:2px 8px; border-radius:9999px; background:#eef2ff; }
+.input { padding:8px 10px; border:1px solid #e5e7eb; border-radius:8px; width:100%; }
+.card { background:white; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 1px 2px rgba(0,0,0,0.03); }
+.btn { padding:8px 12px; border-radius:10px; border:1px solid #e5e7eb; background:white; }
+table { width:100%; border-collapse: collapse; }
+th, td { padding: 10px; border-bottom:1px solid #f1f5f9; text-align:left; }

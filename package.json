@@ -1,0 +1,30 @@
+{
+  "name": "ne-leg-bill-summaries-starter",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "etl": "tsx server/scripts/etl.ts"
+  },
+  "dependencies": {
+    "@tanstack/react-table": "^8.15.5",
+    "cheerio": "^1.0.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^16.4.5",
+    "fast-glob": "^3.3.2",
+    "next": "14.2.5",
+    "pg": "^8.11.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4"
+  }
+}
