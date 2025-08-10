@@ -30,7 +30,7 @@ def fetch_openstates_bills():
         "jurisdiction": OCD_NE,
         "session": session_id,
         "sort": "first_action_desc",   # ✅ valid enum; orders by introduction date
-        "per_page": 50,
+        "per_page": 20,
         "page": 1,
     }
 
