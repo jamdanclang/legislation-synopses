@@ -14,8 +14,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export const revalidate = false;
-export const dynamic = 'error';
-export const dynamicParams = false;
 
 function allBills() {
   const p = path.join(process.cwd(), 'data', 'bills.json');
