@@ -1,9 +1,9 @@
+
 // app/bill/[id]/page.tsx
 import fs from 'node:fs';
 import path from 'node:path';
 
 export const revalidate = false;
-// These help static export with dynamic routes:
 export const dynamic = 'error';
 export const dynamicParams = false;
 
@@ -15,7 +15,7 @@ function allBills() {
 
 export async function generateStaticParams() {
   const bills = allBills();
-  // pre-render up to 300 bill detail pages
+  // Pre-render up to 300 bill detail pages
   return bills.slice(0, 300).map((b: any) => ({ id: String(b.id) }));
 }
 
