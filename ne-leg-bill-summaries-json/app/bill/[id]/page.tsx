@@ -1,15 +1,6 @@
 
 // app/bill/[id]/page.tsx
 
-
-export async function generateStaticParams() {
-  const res = await fetch('https://api.example.com/bills');
-  const bills = await res.json();
-  return bills.map(bill => ({ id: bill.id }));
-}
-
-// ...rest of your page code
-
 import fs from 'node:fs';
 import path from 'node:path';
 
