@@ -1,5 +1,16 @@
 
 // app/bill/[id]/page.tsx
+
+
+export async function generateStaticParams() {
+  // Fetch your list of bill IDs here
+  const billIds = ["123", "456"]; // Replace with actual fetch logic
+
+  return billIds.map(id => ({ id }));
+}
+
+// ...rest of your page code
+
 import fs from 'node:fs';
 import path from 'node:path';
 
