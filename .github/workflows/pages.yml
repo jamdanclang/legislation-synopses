@@ -67,6 +67,15 @@ jobs:
           node-version: '20'
 
       - run: npm install
+      - run: |
+            pwd
+            find app -maxdepth 3 -type f -print
+            echo "----- show bill page -----"
+            sed -n '1,140p' app/bill/[id]/page.tsx
+      - run: |
+            echo "Has generateStaticParams?"
+            grep -n "generateStaticParams" -n app/bill/[id]/page.tsx || true
+
       - run: npm run build
 
       - name: Upload artifact
