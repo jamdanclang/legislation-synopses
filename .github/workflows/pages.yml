@@ -5,13 +5,14 @@ on:
     branches: [ main ]
   workflow_dispatch: {}
   schedule:
-    - cron: "0 12 * * *"
+    - cron: "0 12 * * *"   # daily at 12:00 UTC
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# ✅ Put defaults here (top-level), not inside steps
 defaults:
   run:
     working-directory: ne-leg-bill-summaries-json
@@ -26,6 +27,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # (Optional) Quick sanity check of paths
+      - run: |
+          pwd
+          ls -la
+          ls -la data || true
+          ls -la scripts || true
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -34,23 +42,32 @@ jobs:
       - name: Install Python deps
         run: python -m pip install -U requests beautifulsoup4
 
+      # (Optional) confirm the secret is being passed
+      - name: Check key presence
+        run: python - << 'PY'
+import os
+v = (os.environ.get("OPENSTATES_API_KEY") or "").strip()
+print("Has OPENSTATES_API_KEY:", bool(v), "length:", len(v))
+PY
+        env:
+          OPENSTATES_API_KEY: ${{ secrets.OPENSTATES_API_KEY }}
+
       - name: Run Python ETL (writes data/bills.json)
         run: python scripts/etl.py
         env:
           OPENSTATES_API_KEY: ${{ secrets.OPENSTATES_API_KEY }}
-          SESSION_IDENTIFIER: "2025"
+          SESSION_IDENTIFIER: "2025"   # override when needed
           ETL_LOOKBACK_DAYS: "7"
           NE_REQUEST_DELAY_MS: "0.5"
-      defaults:
-        run:
-          working-directory: ne-leg-bill-summaries-json
-    
+          # Optional caps to avoid rate limits if you added them in etl.py:
+          # MAX_PAGES: "3"
+          # PER_PAGE: "50"
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          # no cache since there’s no lockfile; or add a package-lock.json and switch to npm ci
 
-
-      
       - run: npm install
       - run: npm run build
 
@@ -62,6 +79,10 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # (Optional) this makes the Pages URL show up in the job summary
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
+      - id: deployment
         uses: actions/deploy-pages@v4
