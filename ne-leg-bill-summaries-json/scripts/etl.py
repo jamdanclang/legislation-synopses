@@ -17,7 +17,7 @@ OCD_NE = "ocd-jurisdiction/country:us/state:ne/government"
 def _get_ne_current_session_identifier() -> str:
     """Fetch Nebraska jurisdiction with sessions and return the active session identifier."""
     url = f"{API_BASE}/jurisdictions"
-    params = {"include": "legislative_sessions", "per_page": 100}
+    params = {"include": "legislative_sessions", "per_page": 50, "page": 1}
     r = requests.get(url, params=params, headers=HEADERS, timeout=30)
     if r.status_code >= 400:
         raise RuntimeError(f"Jurisdictions error {r.status_code}: {r.text[:500]}")
