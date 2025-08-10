@@ -17,8 +17,7 @@ def fetch_openstates_bills() -> List[Dict[str,Any]]:
     url = "https://v3.openstates.org/bills"
     params = {
         "jurisdiction": "ocd-jurisdiction/country:us/state:ne/government",
-        "created_since": date_n_days_ago(LOOKBACK_DAYS),
-        "sort": "-created_at",
+        "updated_since": date_n_days_ago(LOOKBACK_DAYS),
         "per_page": 50,
         "page": 1
     }
