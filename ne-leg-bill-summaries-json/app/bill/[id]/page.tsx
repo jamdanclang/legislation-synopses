@@ -3,10 +3,9 @@
 
 
 export async function generateStaticParams() {
-  // Fetch your list of bill IDs here
-  const billIds = ["123", "456"]; // Replace with actual fetch logic
-
-  return billIds.map(id => ({ id }));
+  const res = await fetch('https://api.example.com/bills');
+  const bills = await res.json();
+  return bills.map(bill => ({ id: bill.id }));
 }
 
 // ...rest of your page code
