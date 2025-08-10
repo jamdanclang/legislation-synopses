@@ -9,50 +9,26 @@ LOOKBACK_DAYS = int(os.environ.get("ETL_LOOKBACK_DAYS", "7"))
 NE_REQUEST_DELAY = float(os.environ.get("NE_REQUEST_DELAY_MS", "0.5"))
 SESSION_IDENTIFIER = os.environ.get("SESSION_IDENTIFIER")
 API_BASE = "https://v3.openstates.org"
-HEADERS = {"X-API-KEY": (os.environ.get("OPENSTATES_API_KEY") or "").strip(),
-           "Accept": "application/json"}
-
+HEADERS = {
+    "X-API-KEY": (os.environ.get("OPENSTATES_API_KEY") or "").strip(),
+    "Accept": "application/json",
+}
 OCD_NE = "ocd-jurisdiction/country:us/state:ne/government"
-
-def _get_ne_current_session_identifier() -> str:
-    """Fetch Nebraska jurisdiction with sessions and return the active session identifier."""
-    url = f"{API_BASE}/jurisdictions"
-    params = {"include": "legislative_sessions", "per_page": 50, "page": 1}
-    r = requests.get(url, params=params, headers=HEADERS, timeout=30)
-    if r.status_code >= 400:
-        raise RuntimeError(f"Jurisdictions error {r.status_code}: {r.text[:500]}")
-    data = r.json()
-    ne = next((j for j in data.get("results", []) if j.get("name") == "Nebraska"), None)
-    if not ne:
-        raise RuntimeError("Could not find Nebraska in jurisdictions.")
-    sessions = ne.get("legislative_sessions", [])
-    active = [s for s in sessions if s.get("active")]
-    chosen = None
-    if active:
-        # pick the most recent active session by start_date
-        chosen = max(active, key=lambda s: s.get("start_date") or "")
-    elif sessions:
-        chosen = max(sessions, key=lambda s: s.get("start_date") or "")
-    if not chosen or not chosen.get("identifier"):
-        raise RuntimeError("Nebraska session identifier not found.")
-    return chosen["identifier"]
-
-
-def date_n_days_ago(n:int) -> str:
-    d = datetime.datetime.utcnow() - datetime.timedelta(days=n)
-    return d.strftime("%Y-%m-%d")
 
 def fetch_openstates_bills():
     key = (os.environ.get("OPENSTATES_API_KEY") or "").strip()
     if not key:
         raise SystemExit("OPENSTATES_API_KEY is not set.")
+
+    # If you set SESSION_IDENTIFIER in your workflow env, we’ll use it;
+    # otherwise we’ll fall back to an auto-detected current session (your helper).
     session_id = os.environ.get("SESSION_IDENTIFIER") or _get_ne_current_session_identifier()
 
     base = f"{API_BASE}/bills"
     params = {
-        "jurisdiction": OCD_NE,     # robust canonical ID
-        "session": session_id,      # <-- the fix
-        "sort": "-updated_at",      # optional; stable
+        "jurisdiction": OCD_NE,
+        "session": session_id,
+        "sort": "first_action_desc",   # ✅ valid enum; orders by introduction date
         "per_page": 50,
         "page": 1,
     }
@@ -61,13 +37,18 @@ def fetch_openstates_bills():
     while True:
         r = requests.get(base, params=params, headers=HEADERS, timeout=30)
         if r.status_code in (400, 422):
-            # Show the server’s message in Actions logs to diagnose quickly
+            # Show server explanation in logs and try a safe fallback once
+            print("Bills error", r.status_code, r.text[:500])
+            if params.get("sort"):
+                # fallback: use updated_desc, also valid
+                params["sort"] = "updated_desc"
+                continue
             raise RuntimeError(f"Bills error {r.status_code}: {r.text[:800]}")
         r.raise_for_status()
         data = r.json()
         results += data.get("results", [])
         max_page = int(data.get("pagination", {}).get("max_page", 1))
-        if params["page"] >= max_page or params["page"] >= 4:  # cap to ~200 for speed
+        if params["page"] >= max_page or params["page"] >= 4:  # cap pages for speed
             break
         params["page"] += 1
     return results
