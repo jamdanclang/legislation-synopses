@@ -38,6 +38,7 @@ jobs:
         run: python scripts/etl.py
         env:
           OPENSTATES_API_KEY: ${{ secrets.OPENSTATES_API_KEY }}
+          SESSION_IDENTIFIER: "2025"
           ETL_LOOKBACK_DAYS: "7"
           NE_REQUEST_DELAY_MS: "0.5"
 
