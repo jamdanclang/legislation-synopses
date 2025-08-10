@@ -14,6 +14,7 @@ HEADERS = {
     "Accept": "application/json",
 }
 OCD_NE = "ocd-jurisdiction/country:us/state:ne/government"
+MAX_PAGES = int(os.environ.get("MAX_PAGES", "3"))
 
 def fetch_openstates_bills():
     key = (os.environ.get("OPENSTATES_API_KEY") or "").strip()
