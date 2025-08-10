@@ -7,33 +7,36 @@ from bs4 import BeautifulSoup
 OPENSTATES_API_KEY = os.environ.get("OPENSTATES_API_KEY")
 LOOKBACK_DAYS = int(os.environ.get("ETL_LOOKBACK_DAYS", "7"))
 NE_REQUEST_DELAY = float(os.environ.get("NE_REQUEST_DELAY_MS", "0.5"))
+SESSION_IDENTIFIER = os.environ.get("SESSION_IDENTIFIER")
 
 def date_n_days_ago(n:int) -> str:
     d = datetime.datetime.utcnow() - datetime.timedelta(days=n)
     return d.strftime("%Y-%m-%d")
 
-def fetch_openstates_bills() -> List[Dict[str,Any]]:
+def fetch_openstates_bills():
     assert OPENSTATES_API_KEY, "OPENSTATES_API_KEY not set"
-    url = "https://v3.openstates.org/bills"
+    base = "https://v3.openstates.org/bills"
+    headers = {"X-API-KEY": OPENSTATES_API_KEY, "Accept": "application/json"}
+
     params = {
-        "jurisdiction": "ocd-jurisdiction/country:us/state:ne/government",
-        "updated_since": date_n_days_ago(LOOKBACK_DAYS),
+        "jurisdiction": "Nebraska",
         "per_page": 50,
         "page": 1
     }
-    headers = { "X-API-KEY": OPENSTATES_API_KEY }
-    out = []
+    if SESSION_IDENTIFIER:
+        params["session"] = SESSION_IDENTIFIER  # <-- key line
+
+    results = []
     while True:
-        r = requests.get(url, params=params, headers=headers, timeout=30)
+        r = requests.get(base, params=params, headers=headers, timeout=30)
         r.raise_for_status()
         data = r.json()
-        out += data.get("results", [])
-        pag = data.get("pagination", {})
-        max_page = int(pag.get("max_page", 1))
+        results += data.get("results", [])
+        max_page = int(data.get("pagination", {}).get("max_page", 1))
         if params["page"] >= max_page:
             break
         params["page"] += 1
-    return out
+    return results
 
 def first_ne_official_url(item:Dict[str,Any]) -> Optional[str]:
     for s in item.get("sources", []):
